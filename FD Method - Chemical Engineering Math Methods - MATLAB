@@ -1,0 +1,52 @@
+%   FD Method
+%
+%   Given differential eqn.:
+%   xy'' + (1-2x)y' + (x-1)y = 0
+%
+%   getting started
+      clear all, close all, nfig = 0;
+%                                                                           
+%   set domain limits and boundary conditions
+      xo = 0;   xf = 1;  yxo = 2;   yxf = 0; 
+      
+      N = input('The interval grid of mesh point number: ')
+
+%
+%   compute interval size and discrete x vector
+        dx = (xf-xo)/(N+1);   dx2 = dx*dx;    x = (xo+dx):dx:(xf-dx);
+%                                                                             
+%                                                                             
+%   Approximations:  y'' = [y(i-1) - 2y(i) + y(i+1)]/(dx^2)  error => (dx^2)
+%     (Case A)       y'  = [y(i+1) - y(i-1)]/(2dx)           error => (dx^2)     
+%                                                                             
+%                                                                             
+%   setup matrix eqns. (treat boundary terms as special cases)  
+        A = zeros(N,N);   B = zeros(N,1);
+        for i = 2:N-1                                                          
+          A(i,i-1) = 1-3*x(i)*dx/2;    
+          A(i,i) = -2+7*dx2;                                                     
+          A(i,i+1) = 1+3*x(i)*dx/2;     
+          B(i) = dx2*cos(2*x(i));     
+        end                                                                       
+%   left boundary                                                             
+        A(1,1) = -2+7*dx2;                                                        
+        A(1,2) = 1+3*x(1)*dx/2;  
+        B(1) = dx2*cos(2*x(1))-(1-3*x(1)*dx/2)*yxo;
+%   right boundary                                                            
+        A(N,N-1) = 1-3*x(N)*dx/2;                                          
+        A(N,N) = -2+7*dx2;                                                  
+        B(N) = dx2*cos(2*x(N))-(1+3*x(N)*dx/2)*yxf;                         
+%   solve system of eqns                                                      
+        y = A\B;                                                                 
+%   add boundary points to solution for plotting                              
+        za = [yxo y' yxf];   xa = [xo x xf];
+%                                                                                                                                                         
+%                                                                             
+%   plot results for both cases                                                             
+        
+        plot(xa,za,'r-','LineWidth',2) 
+        axis([0 3.2 -2 1]);
+        title(['FD:  FD Method (',num2str(N),' pts)']) 
+        xlabel('x values'),ylabel('y values'),grid                                
+        legend('Case A')                                           
+%
