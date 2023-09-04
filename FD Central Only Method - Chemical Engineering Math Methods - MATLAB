@@ -1,0 +1,56 @@
+clear all, close all
+%   define the boundary conditions and x range
+xo = 0;
+xf = pi;
+yxo = 1;
+yxf = 0;
+
+%   run the for loop to get different pts for FD method
+for Nx = 5:10:45
+x = linspace(xo,xf,Nx);
+h = (xf-xo)/(Nx-1);
+a = zeros(size(x)-2);
+b = zeros(size(x)-2);
+c = zeros(size(x)-2);
+A = zeros(Nx-2);
+
+%   set up the A matrix and B vector
+for i = 1:(Nx-2)
+    xi = x(i+1);
+    a(i) = 1-h/2*3*xi;
+    b(i) = -(2-h^2*7);
+    c(i) = 1+h/2*3*xi;
+    if i == 1
+   A(i,i) = b(i);
+   A(i,i+1) = c(i);
+   B(i) = h^2*cos(2*xi)-a(i)*yxo;
+elseif i == Nx-2
+   A(i,i) = b(i);
+   A(i,i-1) = a(i);
+   B(i) = h^2*cos(2*xi)-c(i)*yxf;
+else
+   A(i,i-1) = a(i);
+   A(i,i) = b(i);
+   A(i,i+1) = c(i);
+   B(i) = h^2*cos(2*xi);
+end
+
+end
+    y = A\B';
+    yw = [yxo;y;yxf];
+    
+            
+%   plot results for for FD_central                                                           
+        
+        plot(x,yw,'LineWidth',2),hold on
+    
+end   
+ for j = 1:5
+     npts = 5+10*(j-1);
+     txt(j) = {['pts = ',num2str(npts)]};
+ end
+
+        axis([0 3.2 -2 1]);
+        title('FD with various points') 
+        xlabel('x values'),ylabel('y values'),grid                                
+        legend(txt)  
