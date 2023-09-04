@@ -1,0 +1,64 @@
+%   FD Method
+%
+%   Given differential eqn.:
+%   xy'' + (1-2x)y' + (x-1)y = 0
+%
+%   get started
+    clear all, close all
+%
+%   define the boundary conditions and x range
+xo = 1;
+xf = 3;
+xe = linspace(1,3,1000);
+ye = exp(xe).*(2-log(xe));
+%
+%   run the for loop to get different pts for FD method
+Nx = 1000;
+x = linspace(xo,xf,Nx);
+h = (xf-xo)/(Nx-1);
+a = zeros(size(x)-2);
+b = zeros(size(x)-2);
+c = zeros(size(x)-2);
+A = zeros(Nx);
+%
+%   set up the A matrix and B vector
+for i = 1:(Nx)
+
+    if i == 1
+   A(i,i) = h+3;
+   A(i,i+1) = -3;
+   B(i) = -2.7183*h;
+  
+elseif i == Nx
+   A(i,i) = 1;
+   A(i,i-1) = -1;
+   B(i) = 11.4098*h;
+  
+else
+    xi = x(i);
+    a(i-1) = 1+(h/2)*((2*xi-1)/xi);
+    b(i-1) = -(2+(h^2)*((1-xi)/xi));
+    c(i-1) = 1-(h/2)*((2*xi-1)/xi);
+   A(i,i-1) = a(i-1);
+   A(i,i) = b(i-1);
+   A(i,i+1) = c(i-1);
+   B(i) = 0;
+    end
+end
+%
+y = A\B';
+yw = y;
+%            
+%   plot results for for FD_central                                                             
+plot(x,yw,'g-',xe,ye,'r-','LineWidth',2),hold on
+title('FD Method Solution vs. Exact Solution') 
+xlabel('x values'),ylabel('y values'),grid
+legend('FD','Exact','Location','SouthEast')
+%
+% end
+%
+%   The exact solution and the numerical solution solved via FD
+%   method corralates with each other. Also, the exact solution and the
+%   numerical solution solved via FD method are nearly identical. Hence,
+%   the solution with the FD method gives us a clear idea regarding
+%   the behaviour of the solution but not exactly overlaps with the exact solution.
