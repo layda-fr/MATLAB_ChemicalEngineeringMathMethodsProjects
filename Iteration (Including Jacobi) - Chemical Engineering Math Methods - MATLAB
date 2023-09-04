@@ -1,0 +1,247 @@
+%   get started
+clear all, close all
+
+%   define two matrices A1 and A2
+A1 = [4 -1 1;
+    4 -8 1;
+    -2 1 5];
+
+A2 = [-2 1 5;
+    4 -8 1;
+    4 -1 1];
+%   define diagonal elements of A1 and A2;
+d1 = diag(A1);
+D1 = diag(d1); %    arrange diagonal elements into a matrix
+d2 = diag(A2);
+D2 = diag(d2);
+
+%   define the rest elements of T1 and T2;
+T1 = A1 - D1;
+T2 = A2 - D2;
+
+%   calculate the eigenvalues of inverse(D)*T
+abs(eig(inv(D1)*T1))
+abs(eig(inv(D2)*T2))
+
+%  
+%  
+%  
+
+%   get started
+clear all, close all
+
+%   define the orignial matrix for A and b as Ax = b
+A = [4 -1 1;
+    4 -8 1;
+    -2 1 5];
+b = [7; -21; 15];
+
+%   true soluation using LU decomposition
+
+xsol = A\b
+
+
+%   estimated solution using Jacobi iteration
+%   define the new minterative matrix
+
+D = diag(diag(A));
+L = tril(A);
+U = triu(A)-D;
+
+%  
+%  
+% 
+
+%   get started
+clear all, close all
+
+%   define the orignial matrix for A and b as Ax = b
+A = [4 -1 1;
+    4 -8 1;
+    -2 1 5];
+b = [7; -21; 15];
+
+%   true soluation using LU decomposition
+
+xsol = A\b
+
+
+%   estimated solution using Jacobi iteration
+%   define the new interative matrix
+%   x_k+1 = Anew*x_k+bnew
+
+Anew = [0 1/2 -15/2;
+    1/2 0 1/8;
+    -4 1 0];
+bnew = [-15/2; 21/8; 7];
+x0 = ones(size(bnew)); % initial guess
+tol = 1e-6; % keep iterating until error converges to <=tol
+error = 2*tol;
+x(:,1) = x0;
+iteration = 1;
+
+%   jacobi iteration loop
+while((error>tol)&&(iteration<100))
+    iteration = iteration +1;
+    x(:,iteration)=Anew*x(:,iteration-1)+bnew;
+    error = norm(x(:,iteration)-x(:,iteration-1),Inf); %    worst component
+end
+Trueiteration = iteration-1
+
+plot(x')
+
+%  
+%  
+% 
+
+%   get started
+clear all, close all
+
+%   define the orignial matrix for A and b as Ax = b
+A = [4 -1 1;
+    4 -8 1;
+    -2 1 5];
+b = [7; -21; 15];
+
+%   true soluation using LU decomposition
+
+xsol = A\b
+
+
+%   estimated solution using Jacobi iteration
+%   define the new interative matrix
+%   x_k+1 = Anew*x_k+bnew
+
+Anew = [0 1/4 -1/4;
+    1/2 0 1/8;
+    2/5 -1/5 0];
+bnew = [7/4; 21/8; 15/5];
+x0 = ones(size(bnew)); % initial guess
+tol = 1e-6; % keep iterating until error converges to <=tol
+error = 2*tol;
+x(:,1) = x0;
+iteration = 1;
+
+%   jacobi iteration loop
+while((error>tol)&&(iteration<100))
+    iteration = iteration +1;
+    x(:,iteration)=Anew*x(:,iteration-1)+bnew;
+    error = norm(x(:,iteration)-x(:,iteration-1),Inf); %    worst component
+end
+Trueiteration = iteration-1
+
+plot(x')
+
+%  
+%  
+% 
+
+%   get started
+clear all, close all
+
+%   define the A matrix and b vector
+A=[8 0 -6; 0 -8 -2; 6 4 0];
+b = [7; -1; 4];
+
+%   define the elementary matrix to convert A to a upper triangular matrix
+E31 = [1 0 0; 0 1 0; -3/4 0 1];
+E32 = [1 0 0; 0 1 0; 0 1/2 1];
+
+U1=E32*E31*A
+
+%   The lower triangular matrix is contrcuted by inverse of the elementary
+%   matrix
+L1=inv(E31)*inv(E32)
+
+
+%   LU decomposition
+[L,U]=lu(A)
+
+%   Solve the problem Ax = b
+x = L\b
+y = U\x
+
+%  
+%  
+% 
+
+% Analyze SR Method for a Simple 3x3 System
+
+%   getting started
+      clear all,  close all,  nfig = 0;
+%
+%   define system of interest and vector of relaxation parameters
+      A = [1 2 3;2 9 6;3 6 27];  b = [2 -4 24]';
+      alf = 0.8:0.025:1.6;   Nalf = length(alf);
+%
+%   solve system for range of alf and save k = # of iterations to convergence
+      tol = 1e-5;   M = 1000;   k = zeros(size(b));
+      for j = 1:Nalf
+        xo = zeros(size(b));  [x,k(j)] = sr(A,b,xo,alf(j),tol,M);
+      end
+%
+%   now compute the spectral radius
+      L = tril(A,-1);  D = diag(diag(A));  U = triu(A,1);
+      p = zeros(size(b));
+      for j = 1:Nalf
+        B = inv(alf(j)*L + D)*((1-alf(j))*D - alf(j)*U);
+        v = eig(B);   p(j) = max(abs(v));
+      end
+%
+%   plot results
+      nfig = nfig+1;   figure(nfig)
+      subplot(2,1,1), plot(p,k,'b.','LineWidth',2),grid
+      xlabel('spectral radius'),ylabel('# iterations')
+      title('SR\_Demo1:  Results for Analysis of Convergence Rates for SR Method')
+      subplot(2,2,3), plot(alf,k,'r-','LineWidth',2),grid
+      xlabel('relaxation parameter'),ylabel('# iterations')
+      subplot(2,2,4), plot(alf,p,'g-','LineWidth',2),grid
+      xlabel('relaxation parameter'),ylabel('spectral radius')
+
+%  
+%  
+% 
+
+%   Function to implement the Successive Relaxation (SR) Method
+
+%
+%   Inputs:  A     = n by n coefficient matrix (nonzero diagonal elements)  
+%            b     = n by 1 right-hand side vector
+%            x     = n by 1 vector containing initial guess
+%            alpha = relaxation parameter (alpha > 0)
+%            tol   = error tolerance used to terminate search
+%            M     = maximum number of iterations 
+
+%   Outputs: x = n by 1 solution vector
+%            k = number of iterations performed 
+%                   
+      function [x,k] = sr(A,b,x,alpha,tol,M)
+%
+%   set some iteration parameters
+      k = 0;   rmax = 1;
+%
+%   check for zeros along diagonal
+      n = length(x);
+      for i = 1:n
+        if abs(A(i,i)) < eps
+          disp('   WARNING:  Check A matrix for a zero along the diagonal!!!')
+          disp(' ')
+          return;
+        end
+      end
+%
+%   perform iteration
+      while (k < M & rmax >= tol)
+        for i = 1:n;
+          d = A(i,i);
+          x(i) = (1 - alpha)*x(i) + alpha*b(i)/d;
+          for j = 1:n
+            if j ~= i
+              x(i) = x(i) - alpha*A(i,j)*x(j)/d; 
+            end
+          end
+        end
+        rmax = max(abs(b - A*x));
+        k = k + 1;
+      end
+%
