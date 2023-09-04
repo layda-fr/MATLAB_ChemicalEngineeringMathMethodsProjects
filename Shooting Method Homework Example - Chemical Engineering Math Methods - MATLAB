@@ -1,0 +1,111 @@
+%   Shooting Method
+%
+%   Given differential eqn.:
+%   xy'' + (1-2x)y' + (x-1)y = 0
+%
+     function zp = shootf(x,z)
+     A = [0 1;(1-x)/x (2*x-1)/x];
+     zp = A*z;
+%
+%   end of function
+
+
+
+%   Shooting Method
+%
+%   Given differential eqn.:
+%   xy'' + (1-2x)y' + (x-1)y = 0
+%
+%   getting started
+      clear all, close all
+%
+%   set domain limits 
+      xo = 1;    
+      xf = 3;  
+      Ne = 100;
+      xe = linspace(xo,xf,Ne);
+      ye = (2-log(xe)).*exp(xe);
+%
+%   set coefficients for BCs
+      zbc = [1 -3 -2.7183;      % left BC  --> y(xo)-3*y'(xo) = -2.7183
+             0 1 11.4098];     % right BC --> y'(xf) = 11.4098
+%
+%   solution via Shooting Method (numerical approx)
+      tol = 1e-6;  options = odeset('RelTol',tol);   % set tight tolerance for ODE soln
+      [xs,zs] = bvp2sh('shootf',[xo xf],zbc,options);
+%
+%   plot final function values 
+      plot(xs,zs(:,1),'g-',xe,ye,'r-','LineWidth',2),grid
+      title('Shooting Method for ODEs with Automated Iteration')                  
+      xlabel('x values'),ylabel('y values')
+      legend('Shooting','Exact','Location','SouthEast')
+%
+%   end 
+%
+%   The exact solution and the numerical solution solved via Shooting
+%   method corralates with each other and the exact solution and the
+%   numerical solution solved via Shooting method are identical. Hence,
+%   the solutions exactly overlap with each other unlike FD.
+
+
+
+%   Shooting Method
+%
+%   Given differential eqn.:
+%   xy'' + (1-2x)y' + (x-1)y = 0
+%
+      function [t,z]  = bvp2sh(func,tspan,zbc,options,alfo)
+%
+%   check to see if the options structure is available
+      if nargin < 4,  options = [];   end
+%
+%   check to see if there is an initial guess for alfo
+      if nargin < 5,  alfo = 1;   end
+%
+%   extract BC coefficients (for convenience)
+      a1 = zbc(1,1);  b1 = zbc(1,2);  w1 = zbc(1,3);
+      a2 = zbc(2,1);  b2 = zbc(2,2);  w2 = zbc(2,3);
+%
+%   set some other iterative parameters
+      err = 1e10;   tol = 1e-6;   icnt = 1;   icntmax = 25;
+%
+%   start iteration  
+      while abs(err) > tol  &&  icnt <= icntmax
+%
+%   determine initial condition vector based on structure of zbc matrix
+        if b1 == 0
+          zo = [w1/a1; alfo];
+        else
+          zo = [alfo; (w1 - a1*alfo)/b1];
+        end
+%
+%   solve IVP with current guess for initial conditions
+        [t,z] = ode23(func,tspan,zo,options);
+%
+%   evaluate error in second BC
+        e1 =  a2*z(end,1) + b2*z(end,2) - w2;  err = e1;
+        fprintf(1,'  \n')
+        fprintf(1,'For iteration # %2i: \n',icnt)
+        fprintf(1,'  Initial conditions are: %13.5e %13.5e \n',zo)
+        fprintf(1,'  Error in 2nd BC is:     %13.5e \n',err)
+        fprintf(1,'  \n')
+%
+%   estimate new values for alf (if necessary)
+        if abs(err) > tol
+          alfp = 1.01*alfo;
+          if b1 == 0
+            zo = [w1/a1; alfp];
+          else
+            zo = [alfp; (w1 - a1*alfp)/b1];
+          end
+          [t,z] = ode23(func,tspan,zo,options);
+          e2 =  a2*z(end,1) + b2*z(end,2) - w2;  
+          deda = (e2-e1)/(0.01*alfo);    alfn = alfo-e1/deda;
+          icnt = icnt+1;   alfo = alfn;
+        end
+      end   % end of iteration loop
+      if icnt >= icntmax
+        fprintf(1,'  WARNING -- Hit maximum iteration limit!!! \n');
+      end
+%
+%   end 
