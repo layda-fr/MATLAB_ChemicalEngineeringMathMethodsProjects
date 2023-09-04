@@ -1,0 +1,25 @@
+%   Evaluate and compare solutions to the following initial value problem (IVP): y' - y = 2x   with  y(0) = 1
+%   Picard's result:  y0(x) = 1
+%                     y1(x) = 1 + x + x^2
+%                     y2(x) = 1 + x +(3x^2)/2 +(x^3)/3
+%
+%   Exact Solution:    y(x) = 3*exp(x) - 2x -2
+
+clear all, close all, nfig = 0;
+
+% define x axis
+x=linspace(0,1,51);
+
+% Evaluate y values using picard orders
+y0 = ones(size(x));
+y1 = 1+x+x.*x;
+y2 = 1+x+3*x.*x+x.*x.*x/3;
+ye = 3*exp(x)-2*x-2;
+
+%   plot comparisons
+v = [0 1 0.5 4.5];
+plot(x,y0,'r-',x,y1,'b--',x,y2,'g-',x,ye,'m--','LineWidth',2)
+axis(v),
+title('Picard:  Example of the Picard Iteration Method')
+xlabel('x values'),ylabel('y(x)'),
+legend('0th order','1st order','2nd order','exact soln','Location','NorthWest')
