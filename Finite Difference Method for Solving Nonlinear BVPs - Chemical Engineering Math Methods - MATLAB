@@ -1,0 +1,74 @@
+% Finite Difference Method for Solving Nonlinear BVPs
+
+% Description of given differential equation
+% y'' + 3x(1+0.2y)y' + 7y = cos(2x) with y(0) = 1 and y(pi) = 0
+
+%   Function FD_NL_MX.M is used to set up the matrix equations.
+
+%   set domain limits and boundary conditions
+xo = 0; xf = pi; yxo = 1; yxf = 0;nfig = 0;
+%   user defined number of unknowns in problem
+N = input(' Input number of unknowns in problem (N): ');
+%
+% compute interval size and discrete x vector
+dx = (xf-xo)/(N+1); dx2 = dx*dx; x = (xo+dx):dx:(xf-dx); x = x';
+%
+% specify initial guess
+opt = menu('Select option for initial guess', ...
+'Let initial guess be the constant y(xo) --> gives 1st solution', ...
+'Choose a 6th order polynomial as a rough guess for 2nd solution)');
+if opt == 1
+yold = yxo*ones(size(x)); % specify yold
+titl = '[y_{guess} = y(x_o)]';
+else
+xgp = [xo .5 1.0 1.5 2.0 2.5 xf]; % specify 7 x,y pairs
+ygp = [yxo 4 2 0.4 0.0 0.1 yxf];
+cg = polyfit(xgp,ygp,6); % do a cubic order fit
+yold = polyval(cg,x); % specify yold
+titl = '[y_{guess} = 6^{th} order poly]';
+end
+zg = [yxo; yold; yxf]; xg = [xo; x; xf];
+nfig = nfig+1; figure(nfig)
+plot(xg,zg,'b-','LineWidth',2),grid
+title('FD\_NL: Initial Guess at y(x) for Nonlinear BVP')
+xlabel('x values'),ylabel('y values')
+
+% start iteration loop
+itmax = 20; it = 0; tol = 1e-5; emax = 1;
+while emax > tol && it <= itmax
+it = it+1; c = 3*x.*(1+0.2*yold);
+
+% compute solution profile for given c(x) profile
+[A,b] = FD_NL_matrix(x,c,dx,dx2,yxo,yxf); % determine coeff matrices
+ynew = A\b; % find new solution vector
+
+% check convergence
+emax = max(abs((ynew-yold)./ynew));
+
+% print intermediate edit (only edit for small N)
+if N < 21
+fprintf(1,'\n Intermediate edit \n')
+fprintf(1,' it = %3d max error = %8.2e \n',it,emax)
+fprintf(1,' ynew yold c used\n')
+for j = 1:N
+fprintf(1,' %8.3f %8.3f %8.3f\n',ynew(j),yold(j),c(j))
+end
+end
+
+% define guess for next iteration
+yold = ynew;
+end
+
+% print max relative error and iteration count
+fprintf(1,'\n\n Number of iterations to convergence = %3d\n',it)
+fprintf(1,' Max relative error at convergence = %8.2e\n',emax)
+
+% add boundary points to solution for plotting
+yn = [yxo; yold; yxf]; xn = [xo; x; xf];
+
+% plot final results
+nfig = nfig+1; figure(nfig)
+plot(xn,yn,'r-','LineWidth',2)
+title(['FD\_NL: FD Method for Nonlinear BVP (',num2str(N),' pts) ' titl])
+xlabel('x values'),ylabel('y values'),grid
+%
