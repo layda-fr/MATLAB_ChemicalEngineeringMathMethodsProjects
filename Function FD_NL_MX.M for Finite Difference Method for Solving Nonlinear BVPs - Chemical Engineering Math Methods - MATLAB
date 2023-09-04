@@ -1,0 +1,23 @@
+function [a,b] = FD_central_matrix(x,c,dx,dx2,yxo,yxf)
+%
+% initialize variables
+N = length(x); a = zeros(N,N); b = zeros(N,1);
+%
+% interior points
+for i = 2:N-1
+a(i,i-1) = 1-c(i)*dx/2;
+a(i,i) = -2+7*dx2;
+a(i,i+1) = 1+c(i)*dx/2;
+b(i) = dx2*cos(2*x(i));
+end
+%
+% left boundary
+a(1,1) = -2+7*dx2;
+a(1,2) = 1+c(1)*dx/2;
+b(1) = dx2*cos(2*x(1))-(1-c(1)*dx/2)*yxo;
+%
+% right boundary
+a(N,N-1) = 1-c(N)*dx/2;
+a(N,N) = -2+7*dx2;
+b(N) = dx2*cos(2*x(N))-(1+c(N)*dx/2)*yxf;
+%
